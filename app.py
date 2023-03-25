@@ -5,6 +5,7 @@ import pathlib
 from modelscope.pipelines import pipeline
 from modelscope.outputs import OutputKeys
 from huggingface_hub import snapshot_download
+import ffmpeg
 
 # Init is ran on server startup
 # Load your model to GPU as a global variable here using the variable name "model"
@@ -30,8 +31,16 @@ def inference(model_inputs:dict) -> dict:
     }
     result_path = model(input_text,)[OutputKeys.OUTPUT_VIDEO]
 
+    maxWidth = 512
+    maxHeight = 512
+    threads=8
+
+    inp = ffmpeg.input(result_path)
+    out = ffmpeg.output(inp.video,f"{result_path}.gif",vf=f"scale=if(gte(iw\,ih)\,min({maxWidth}\,iw)\,-2):if(lt(iw\,ih)\,min({maxHeight}\,ih)\,-2),split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse",threads=threads)
+    ffmpeg.run(out,cmd='./ffmpeg',overwrite_output=True)
+
     # read the mp4 file as bytes
-    with open(result_path, 'rb') as file:
+    with open(f"{result_path}.gif", 'rb') as file:
         mp4_bytes = file.read()
 
     # encode the mp4 file as base64
