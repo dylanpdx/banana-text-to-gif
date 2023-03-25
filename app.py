@@ -37,17 +37,17 @@ def inference(model_inputs:dict) -> dict:
 
     inp = ffmpeg.input(result_path)
     out = ffmpeg.output(inp.video,f"{result_path}.gif",vf=f"scale=if(gte(iw\,ih)\,min({maxWidth}\,iw)\,-2):if(lt(iw\,ih)\,min({maxHeight}\,ih)\,-2),split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse",threads=threads)
-    ffmpeg.run(out,cmd='./ffmpeg',overwrite_output=True)
+    ffmpeg.run(out,cmd='ffmpeg',overwrite_output=True)
 
-    # read the mp4 file as bytes
+    # read the gif file as bytes
     with open(f"{result_path}.gif", 'rb') as file:
-        mp4_bytes = file.read()
+        gif_bytes = file.read()
 
-    # encode the mp4 file as base64
-    base64_bytes = base64.b64encode(mp4_bytes)
+    # encode the gif file as base64
+    base64_bytes = base64.b64encode(gif_bytes)
     base64_string = base64_bytes.decode('utf-8')
     
-    # create a response object with the base64-encoded mp4 file as the content
-    response = {'mp4_bytes': base64_string}
+    # create a response object with the base64-encoded gif file as the content
+    response = {'gif_bytes': base64_string}
 
     return response
