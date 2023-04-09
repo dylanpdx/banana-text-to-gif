@@ -6,21 +6,19 @@ from modelscope.pipelines import pipeline
 from modelscope.outputs import OutputKeys
 from huggingface_hub import snapshot_download
 import ffmpeg
-from potassium import Potassium, Request, Response
 
-app = Potassium("text_to_gif")
-
-@app.init
+# Init is ran on server startup
+# Load your model to GPU as a global variable here using the variable name "model"
 def init():
     global model
     model_dir = pathlib.Path('weights')
     snapshot_download('damo-vilab/modelscope-damo-text-to-video-synthesis', repo_type='model', local_dir=model_dir)
     model = pipeline('text-to-video-synthesis', model_dir.as_posix())
-    return {"model":model}
 
-@app.handler()
-def inference(context: dict, request: Request) -> dict:
-    model_inputs=request.json
+# Inference is ran for every server call
+# Reference your preloaded global model variable here.
+def inference(model_inputs:dict) -> dict:
+    global model
 
     # Parse out your arguments
     prompt = model_inputs.get('prompt', None)
@@ -53,7 +51,3 @@ def inference(context: dict, request: Request) -> dict:
     response = {'gif_bytes': base64_string}
 
     return response
-
-
-if __name__ == "__main__":
-    app.serve()

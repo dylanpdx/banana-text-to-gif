@@ -1,4 +1,4 @@
-potassium
+sanic==22.6.2
 transformers
 accelerate
 modelscope
