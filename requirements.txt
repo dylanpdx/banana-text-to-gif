@@ -6,3 +6,4 @@ open_clip_torch
 pytorch_lightning
 opencv-python
 ffmpeg-python
+websockets==10.0
